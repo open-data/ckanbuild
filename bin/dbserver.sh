@@ -56,7 +56,7 @@ init() {
 
     echo 'Setting up default firewall configuration...'
     sudo ufw default deny
-    sudo ufw allow openssh
+    sudo ufw allow ssh
     sudo ufw enable
     echo 'Done setting up default firewall configuration.'
 
