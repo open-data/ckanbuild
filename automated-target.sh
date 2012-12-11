@@ -5,9 +5,9 @@
 # such as:
 #
 #   wget https://raw.github.com/okfn/ckanbuild/master/automated-target.sh
-#   bash automated-target.sh (type)
+#   bash automated-target.sh <type>
 #
-# where (type) is "webserver", "dbserver" or "both".
+# where <type> is "webserver", "dbserver" or "both".
 # The default is "both"
 #
 # It will clone the ckanbuild repository under

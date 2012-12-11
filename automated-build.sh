@@ -5,17 +5,25 @@
 # such as:
 #
 #   wget https://raw.github.com/okfn/ckanbuild/master/automated-build.sh
-#   bash automated-build.sh
+#   bash automated-build.sh <version>
+#
+# where <version> is the CKAN version to build
 #
 # It will clone the ckanbuild repository under
 # /home/okfn/build/ if it does not already exist and
-# build a ckan package with from the latest version
-# of the source code
+# build a ckan package with from the version specified
 
 TARGET_DIR=/home/okfn/build/
 USER_GROUP=1000:1000
+CKAN_REPO=git+https://github.com/okfn/ckan.git
 
 set -e # stop execution on errors
+
+if [ -z "$1" ]; then
+    echo 'You must specify version e.g. "2.0a"'
+    exit 1
+fi
+VERSION="$1"
 
 sudo apt-get -y install git python-virtualenv rubygems \
                         python-dev libpq-dev
@@ -26,22 +34,17 @@ if ! [ -d "$TARGET_DIR" ]; then
     sudo chown -R "$USER_GROUP" "$TARGET_DIR"
 fi
 
-# XXX somewhat terrible: cloning repo just to get the latest __version__
-# and then later pip installing from *another* clone
-cd "$TARGET_DIR"
-[ -d ckan ] || git clone https://github.com/okfn/ckan.git
-cd ckan
-VERSION=`python -c'import ckan; print ckan.__version__'`
-
 cd "$TARGET_DIR"
 [ -d ckanbuild ] || git clone https://github.com/okfn/ckanbuild.git
 cd ckanbuild
 [ -f ckan-bootstrap.py ] || python mk-ckan-bootstrap.py
-if ! [ -d builds/"$VERSION" ]; then
-    python ckan-bootstrap.py ./builds/"$VERSION"/usr/lib/ckan
-    ./package.sh ./builds/"$VERSION"
-fi
 
+python ckan-bootstrap.py ./builds/"$VERSION"/usr/lib/ckan \
+    --ckan-location=${CKAN_REPO}@release-v${VERSION}#egg=ckan
+./package.sh ./builds/"$VERSION"
+
+echo
+echo Package built under: ./builds/"$VERSION"/
 
 
 
